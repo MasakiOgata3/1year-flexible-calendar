@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1年単位変形労働時間制カレンダー作成ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 1.5rem;
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .icon {
+            width: 2rem;
+            height: 2rem;
+            color: #2563eb;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #374151;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-ghost:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Main Layout */
+        .main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 1.5rem;
+            min-height: calc(100vh - 180px);
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Settings Panel */
+        .tabs {
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+        }
+
+        .tab-button.active {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .tab-button:not(.active) {
+            color: #6b7280;
+        }
+
+        .tab-button:not(.active):hover {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        .required {
+            color: #ef4444;
+            margin-left: 0.25rem;
+        }
+
+        .input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: #111827;
+            background: white;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 1px #2563eb;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group .input {
+            flex: 1;
+        }
+
+        .input-group .unit {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Checkbox Group */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            cursor: pointer;
+        }
+
+        /* Week Pattern Settings */
+        .week-pattern {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .week-pattern-header {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+            font-size: 0.875rem;
+        }
+
+        /* Calendar Area */
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .calendar-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .calendar-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 24rem;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .placeholder-content {
+            text-align: center;
+        }
+
+        .placeholder-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+            color: #d1d5db;
+        }
+
+        .placeholder-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .placeholder-text {
+            font-size: 0.875rem;
+        }
+
+        /* Calendar Grid */
+        .calendar-months {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .month-calendar {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background: #fafafa;
+        }
+
+        .month-header {
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.125rem;
+            font-size: 0.75rem;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 0.25rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .calendar-day.work {
+            background: white;
+        }
+
+        .calendar-day.rest {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .calendar-day.holiday {
+            background: #fce4ec;
+            color: #be123c;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-number {
+            font-weight: 500;
+        }
+
+        .day-hours {
+            font-size: 0.625rem;
+            color: #6b7280;
+        }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .stat-unit {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-left: 0.25rem;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #86efac;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem 1.5rem;
+        }
+
+        .footer-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-months {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main {
+                padding: 1rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .calendar-months {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        .scrollable {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 3px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18"></path>
+                    <path d="M5 21V7l8-4v18"></path>
+                    <path d="M19 21V11l-6-4"></path>
+                </svg>
+                <h1>1年単位変形労働時間制カレンダー作成ツール</h1>
+            </div>
+            
+            <nav class="nav">
+                <button class="btn btn-ghost btn-sm" onclick="saveSettings()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    設定保存
+                </button>
+                <button class="btn btn-ghost btn-sm" onclick="exportPDF()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7,10 12,15 17,10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    出力
+                </button>
+                <button class="btn btn-ghost btn-sm" onclick="showHelp()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    ヘルプ
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="grid">
+            <!-- Settings Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">設定</h2>
+                </div>
+                
+                <div class="scrollable">
+                    <!-- Tab Navigation -->
+                    <div class="tabs">
+                        <button class="tab-button active" onclick="switchTab('basic')">基本設定</button>
+                        <button class="tab-button" onclick="switchTab('holidays')">休日設定</button>
+                        <button class="tab-button" onclick="switchTab('advanced')">詳細設定</button>
+                    </div>
+
+                    <!-- Basic Settings Tab -->
+                    <div id="basic-tab" class="tab-content active">
+                        <div class="form-group">
+                            <label class="label">
+                                起算日 <span class="required">*</span>
+                            </label>
+                            <input type="date" class="input" value="2024-04-01" id="startDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label">
+                                1日の所定労働時間 <span class="required">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="input" value="8" min="0" max="12" step="0.5" id="dailyHours">
+                                <span class="unit">時間</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label">週の開始曜日</label>
+                            <select class="input" id="weekStart">
+                                <option value="sunday">日曜日</option>
+                                <option value="monday">月曜日</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">
+                                年間労働日数目標
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="input" value="260" min="200" max="300" id="targetWorkDays">
+                                <span class="unit">日</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Holiday Settings Tab -->
+                    <div id="holidays-tab" class="tab-content">
+                        <div class="form-group">
+                            <label class="label">祝日の扱い</label>
+                            <div style="margin-top: 0.5rem;">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="includeHolidays" checked>
+                                    祝日を休日とする
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">祝日に出勤する場合の労働時間</label>
+                            <div class="input-group">
+                                <input type="number" class="input" value="0" min="0" max="12" step="0.5" id="holidayWorkHours">
+                                <span class="unit">時間</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label">週休日パターン設定</label>
+                            
+                            <!-- 第1週 -->
+                            <div class="week-pattern">
+                                <div class="week-pattern-header">第1週（毎月1日から7日）</div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week1" value="sunday" checked>日
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week1" value="monday">月
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week1" value="tuesday">火
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week1" value="wednesday">水
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week1" value="thursday">木
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week1" value="friday">金
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week1" value="saturday" checked>土
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 第2週 -->
+                            <div class="week-pattern">
+                                <div class="week-pattern-header">第2週（毎月8日から14日）</div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week2" value="sunday" checked>日
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week2" value="monday">月
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week2" value="tuesday">火
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week2" value="wednesday">水
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week2" value="thursday">木
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week2" value="friday">金
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week2" value="saturday" checked>土
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 第3週 -->
+                            <div class="week-pattern">
+                                <div class="week-pattern-header">第3週（毎月15日から21日）</div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week3" value="sunday" checked>日
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week3" value="monday">月
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week3" value="tuesday">火
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week3" value="wednesday">水
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week3" value="thursday">木
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week3" value="friday">金
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week3" value="saturday" checked>土
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 第4週 -->
+                            <div class="week-pattern">
+                                <div class="week-pattern-header">第4週（毎月22日から28日）</div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week4" value="sunday" checked>日
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week4" value="monday">月
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week4" value="tuesday">火
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week4" value="wednesday">水
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week4" value="thursday">木
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week4" value="friday">金
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week4" value="saturday" checked>土
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 第5週 -->
+                            <div class="week-pattern">
+                                <div class="week-pattern-header">第5週（毎月29日以降）</div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week5" value="sunday" checked>日
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week5" value="monday">月
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week5" value="tuesday">火
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week5" value="wednesday">水
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week5" value="thursday">木
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week5" value="friday">金
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="week5" value="saturday" checked>土
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings Tab -->
+                    <div id="advanced-tab" class="tab-content">
+                        <div class="form-group">
+                            <label class="label">特別休日の追加</label>
+                            <div style="margin-bottom: 0.5rem;">
+                                <input type="date" class="input" id="specialHolidayDate" placeholder="日付を選択">
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <input type="text" class="input" id="specialHolidayName" placeholder="休日名（例：創立記念日）">
+                            </div>
+                            <button class="btn btn-secondary btn-sm" onclick="addSpecialHoliday()">特別休日を追加</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">追加済み特別休日</label>
+                            <div id="specialHolidaysList" style="margin-top: 0.5rem;">
+                                <div style="color: #6b7280; font-size: 0.875rem;">
+                                    特別休日はまだ追加されていません
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar Area -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="calendar-header">
+                        <h2 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span id="calendarTitle">2024年度カレンダー</span>
+                        </h2>
+                        <div class="calendar-actions">
+                            <button class="btn btn-primary btn-sm" onclick="checkLegalRequirements()">要件チェック</button>
+                            <button class="btn btn-secondary btn-sm" onclick="generateCalendar()">カレンダー生成</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="calendar-content" class="calendar-placeholder">
+                    <div class="placeholder-content">
+                        <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <p class="placeholder-title">カレンダーを生成してください</p>
+                        <p class="placeholder-text">左側で設定を入力し、「カレンダー生成」ボタンをクリックしてください</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                1年単位変形労働時間制カレンダー作成ツール v1.0
+            </div>
+            <div class="footer-actions">
+                <button class="btn btn-secondary btn-sm" onclick="saveSettings()">設定保存</button>
+                <button class="btn btn-primary btn-sm" onclick="generateCalendar()">カレンダー生成</button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 日本の祝日データ（2024年）
+        const japaneseHolidays2024 = {
+            '2024-01-01': '元日',
+            '2024-01-08': '成人の日',
+            '2024-02-11': '建国記念の日',
+            '2024-02-12': '振替休日',
+            '2024-02-23': '天皇誕生日',
+            '2024-03-20': '春分の日',
+            '2024-04-29': '昭和の日',
+            '2024-05-03': '憲法記念日',
+            '2024-05-04': 'みどりの日',
+            '2024-05-05': 'こどもの日',
+            '2024-05-06': '振替休日',
+            '2024-07-15': '海の日',
+            '2024-08-11': '山の日',
+            '2024-08-12': '振替休日',
+            '2024-09-16': '敬老の日',
+            '2024-09-22': '秋分の日',
+            '2024-09-23': '振替休日',
+            '2024-10-14': 'スポーツの日',
+            '2024-11-03': '文化の日',
+            '2024-11-04': '振替休日',
+            '2024-11-23': '勤労感謝の日',
+        };
+
+        // グローバル変数
+        let calendarData = null;
+        let specialHolidays = [];
+
+        // タブ切り替え
+        function switchTab(tabName) {
+            // すべてのタブコンテンツを非表示
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // すべてのタブボタンから active を除去
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            
+            // 選択されたタブを表示
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // クリックされたボタンに active を追加
+            event.target.classList.add('active');
+        }
+
+        // 設定を取得
+        function getSettings() {
+            const startDate = document.getElementById('startDate').value;
+            const dailyHours = parseFloat(document.getElementById('dailyHours').value);
+            const weekStart = document.getElementById('weekStart').value;
+            const targetWorkDays = parseInt(document.getElementById('targetWorkDays').value);
+            const includeHolidays = document.getElementById('includeHolidays').checked;
+            const holidayWorkHours = parseFloat(document.getElementById('holidayWorkHours').value);
+
+            // 週休日パターンを取得
+            const weekPatterns = [];
+            for (let week = 1; week <= 5; week++) {
+                const restDays = [];
+                const checkboxes = document.querySelectorAll(`input[name="week${week}"]:checked`);
+                checkboxes.forEach(cb => restDays.push(cb.value));
+                weekPatterns.push({ week, restDays });
+            }
+
+            return {
+                startDate,
+                dailyHours,
+                weekStart,
+                targetWorkDays,
+                includeHolidays,
+                holidayWorkHours,
+                weekPatterns,
+                specialHolidays
+            };
+        }
+
+        // カレンダー生成
+        function generateCalendar() {
+            const settings = getSettings();
+            
+            if (!settings.startDate || !settings.dailyHours) {
+                alert('起算日と1日の所定労働時間を入力してください。');
+                return;
+            }
+
+            // カレンダーデータを生成
+            calendarData = createCalendarData(settings);
+            
+            // カレンダーを表示
+            displayCalendar(calendarData);
+        }
+
+        // カレンダーデータ作成
+        function createCalendarData(settings) {
+            const startDate = new Date(settings.startDate);
+            const endDate = new Date(startDate);
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            endDate.setDate(endDate.getDate() - 1);
+
+            const months = [];
+            let totalWorkDays = 0;
+            let totalWorkHours = 0;
+
+            // 月ごとにデータを作成
+            for (let month = 0; month < 12; month++) {
+                const currentMonth = new Date(startDate);
+                currentMonth.setMonth(startDate.getMonth() + month);
+                
+                const monthData = {
+                    year: currentMonth.getFullYear(),
+                    month: currentMonth.getMonth(),
+                    days: [],
+                    workDays: 0,
+                    workHours: 0
+                };
+
+                // 月の日数を取得
+                const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][date.getDay()];
+                    const dateString = date.toISOString().split('T')[0];
+                    
+                    // 週番号を計算（1-5）
+                    const weekNumber = Math.min(Math.ceil(day / 7), 5);
+                    const weekPattern = settings.weekPatterns[weekNumber - 1];
+                    
+                    // 休日判定
+                    let isRest = weekPattern.restDays.includes(dayOfWeek);
+                    let isHoliday = false;
+                    let holidayName = '';
+                    
+                    // 祝日判定
+                    if (japaneseHolidays2024[dateString]) {
+                        isHoliday = true;
+                        holidayName = japaneseHolidays2024[dateString];
+                        if (settings.includeHolidays) {
+                            isRest = true;
+                        }
+                    }
+                    
+                    // 特別休日判定
+                    const specialHoliday = specialHolidays.find(h => h.date === dateString);
+                    if (specialHoliday) {
+                        isRest = true;
+                        isHoliday = true;
+                        holidayName = specialHoliday.name;
+                    }
+                    
+                    // 労働時間計算
+                    let workHours = 0;
+                    if (!isRest) {
+                        workHours = settings.dailyHours;
+                    } else if (isHoliday && !settings.includeHolidays) {
+                        workHours = settings.holidayWorkHours;
+                    }
+                    
+                    const dayData = {
+                        date: day,
+                        dayOfWeek,
+                        isRest,
+                        isHoliday,
+                        holidayName,
+                        workHours,
+                        dateString
+                    };
+                    
+                    monthData.days.push(dayData);
+                    
+                    if (workHours > 0) {
+                        monthData.workDays++;
+                        monthData.workHours += workHours;
+                        totalWorkDays++;
+                        totalWorkHours += workHours;
+                    }
+                }
+                
+                months.push(monthData);
+            }
+
+            return {
+                settings,
+                months,
+                totalWorkDays,
+                totalWorkHours,
+                averageWeeklyHours: totalWorkHours / 52,
+                startDate: settings.startDate,
+                endDate: endDate.toISOString().split('T')[0]
+            };
+        }
+
+        // カレンダー表示
+        function displayCalendar(data) {
+            const calendarContent = document.getElementById('calendar-content');
+            
+            // タイトル更新
+            const startYear = new Date(data.startDate).getFullYear();
+            document.getElementById('calendarTitle').textContent = `${startYear}年度カレンダー`;
+            
+            // 統計情報
+            const statsHtml = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">年間労働日数</div>
+                        <div class="stat-value">${data.totalWorkDays}<span class="stat-unit">日</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">年間総労働時間</div>
+                        <div class="stat-value">${data.totalWorkHours}<span class="stat-unit">時間</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">週平均労働時間</div>
+                        <div class="stat-value">${data.averageWeeklyHours.toFixed(1)}<span class="stat-unit">時間</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">期間</div>
+                        <div class="stat-value" style="font-size: 0.875rem;">${formatDate(data.startDate)}〜${formatDate(data.endDate)}</div>
+                    </div>
+                </div>
+            `;
+            
+            // 月別カレンダー
+            let monthsHtml = '<div class="calendar-months">';
+            
+            data.months.forEach(month => {
+                monthsHtml += createMonthCalendar(month);
+            });
+            
+            monthsHtml += '</div>';
+            
+            calendarContent.innerHTML = statsHtml + monthsHtml;
+        }
+
+        // 月カレンダー作成
+        function createMonthCalendar(monthData) {
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+            
+            let html = `
+                <div class="month-calendar">
+                    <div class="month-header">${monthData.year}年${monthNames[monthData.month]} (労働: ${monthData.workDays}日/${monthData.workHours}時間)</div>
+                    <div class="calendar-grid">
+            `;
+            
+            // 曜日ヘッダー
+            weekdays.forEach(day => {
+                html += `<div class="calendar-weekday">${day}</div>`;
+            });
+            
+            // 月初の空白
+            const firstDay = new Date(monthData.year, monthData.month, 1).getDay();
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div></div>';
+            }
+            
+            // 日付
+            monthData.days.forEach(day => {
+                const dayClass = day.isHoliday ? 'holiday' : (day.isRest ? 'rest' : 'work');
+                const title = day.holidayName || (day.workHours > 0 ? `${day.workHours}時間` : '休日');
+                
+                html += `
+                    <div class="calendar-day ${dayClass}" title="${title}">
+                        <div class="day-number">${day.date}</div>
+                        <div class="day-hours">${day.workHours > 0 ? day.workHours + 'h' : '休'}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            
+            return html;
+        }
+
+        // 日付フォーマット
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+
+        // 法定要件チェック
+        function checkLegalRequirements() {
+            if (!calendarData) {
+                alert('先にカレンダーを生成してください。');
+                return;
+            }
+
+            const issues = [];
+            
+            // 年間労働時間チェック（2085時間以内）
+            if (calendarData.totalWorkHours > 2085) {
+                issues.push({
+                    type: 'error',
+                    message: `年間総労働時間が上限（2,085時間）を超えています。現在: ${calendarData.totalWorkHours}時間`
+                });
+            }
+            
+            // 週平均労働時間チェック（40時間以内が推奨）
+            if (calendarData.averageWeeklyHours > 40) {
+                issues.push({
+                    type: 'warning',
+                    message: `週平均労働時間が40時間を超えています。現在: ${calendarData.averageWeeklyHours.toFixed(1)}時間`
+                });
+            }
+            
+            // 1日の労働時間チェック（10時間以内）
+            if (calendarData.settings.dailyHours > 10) {
+                issues.push({
+                    type: 'error',
+                    message: `1日の労働時間が上限（10時間）を超えています。現在: ${calendarData.settings.dailyHours}時間`
+                });
+            }
+            
+            // 結果表示
+            let alertHtml = '';
+            
+            if (issues.length === 0) {
+                alertHtml = '<div class="alert alert-success">✓ すべての法定要件を満たしています。</div>';
+            } else {
+                issues.forEach(issue => {
+                    const alertClass = issue.type === 'error' ? 'alert-error' : 'alert-warning';
+                    alertHtml += `<div class="alert ${alertClass}">${issue.message}</div>`;
+                });
+            }
+            
+            // カレンダーコンテンツの先頭に追加
+            const calendarContent = document.getElementById('calendar-content');
+            const existingContent = calendarContent.innerHTML;
+            calendarContent.innerHTML = alertHtml + existingContent;
+        }
+
+        // 特別休日追加
+        function addSpecialHoliday() {
+            const date = document.getElementById('specialHolidayDate').value;
+            const name = document.getElementById('specialHolidayName').value;
+            
+            if (!date || !name) {
+                alert('日付と休日名を入力してください。');
+                return;
+            }
+            
+            specialHolidays.push({ date, name });
+            
+            // リスト更新
+            updateSpecialHolidaysList();
+            
+            // 入力クリア
+            document.getElementById('specialHolidayDate').value = '';
+            document.getElementById('specialHolidayName').value = '';
+        }
+
+        // 特別休日リスト更新
+        function updateSpecialHolidaysList() {
+            const listDiv = document.getElementById('specialHolidaysList');
+            
+            if (specialHolidays.length === 0) {
+                listDiv.innerHTML = '<div style="color: #6b7280; font-size: 0.875rem;">特別休日はまだ追加されていません</div>';
+            } else {
+                let html = '';
+                specialHolidays.forEach((holiday, index) => {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f9fafb; border-radius: 0.375rem; margin-bottom: 0.5rem;">
+                            <span>${formatDate(holiday.date)} - ${holiday.name}</span>
+                            <button class="btn btn-ghost btn-sm" onclick="removeSpecialHoliday(${index})">削除</button>
+                        </div>
+                    `;
+                });
+                listDiv.innerHTML = html;
+            }
+        }
+
+        // 特別休日削除
+        function removeSpecialHoliday(index) {
+            specialHolidays.splice(index, 1);
+            updateSpecialHolidaysList();
+        }
+
+        // 設定保存
+        function saveSettings() {
+            const settings = getSettings();
+            localStorage.setItem('calendarSettings', JSON.stringify(settings));
+            alert('設定を保存しました。');
+        }
+
+        // 設定読み込み
+        function loadSettings() {
+            const saved = localStorage.getItem('calendarSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                
+                // 基本設定
+                document.getElementById('startDate').value = settings.startDate || '2024-04-01';
+                document.getElementById('dailyHours').value = settings.dailyHours || 8;
+                document.getElementById('weekStart').value = settings.weekStart || 'sunday';
+                document.getElementById('targetWorkDays').value = settings.targetWorkDays || 260;
+                
+                // 休日設定
+                document.getElementById('includeHolidays').checked = settings.includeHolidays !== false;
+                document.getElementById('holidayWorkHours').value = settings.holidayWorkHours || 0;
+                
+                // 週休日パターン
+                if (settings.weekPatterns) {
+                    settings.weekPatterns.forEach((pattern, index) => {
+                        const week = index + 1;
+                        // すべてのチェックボックスをクリア
+                        document.querySelectorAll(`input[name="week${week}"]`).forEach(cb => cb.checked = false);
+                        // 保存された休日をチェック
+                        pattern.restDays.forEach(day => {
+                            const checkbox = document.querySelector(`input[name="week${week}"][value="${day}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+                    });
+                }
+                
+                // 特別休日
+                if (settings.specialHolidays) {
+                    specialHolidays = settings.specialHolidays;
+                    updateSpecialHolidaysList();
+                }
+            }
+        }
+
+        // PDF出力（仮実装）
+        function exportPDF() {
+            if (!calendarData) {
+                alert('先にカレンダーを生成してください。');
+                return;
+            }
+            alert('PDF出力機能は実装中です。');
+        }
+
+        // ヘルプ表示
+        function showHelp() {
+            alert('1年単位変形労働時間制カレンダー作成ツール v1.0\n\n使い方：\n1. 基本設定で起算日と労働時間を設定\n2. 休日設定で週休日パターンを設定\n3. カレンダー生成ボタンをクリック\n4. 要件チェックで法定要件を確認');
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            console.log('1年単位変形労働時間制カレンダー作成ツール が読み込まれました');
+        });
+    </script>
+</body>
+</html>
